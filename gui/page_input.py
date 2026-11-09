@@ -15,6 +15,7 @@ from PyQt6.QtWidgets import (
 )
 
 from methods import registry
+from .styles import title_style
 from .widgets import FieldEditor, InputError, format_default, parse_float
 
 
@@ -30,7 +31,7 @@ class InputPage(QWidget):
         layout = QVBoxLayout(self)
 
         self.title_label = QLabel("Ввод данных")
-        self.title_label.setStyleSheet("font-size: 18px; font-weight: bold;")
+        self.title_label.setStyleSheet(title_style())
         layout.addWidget(self.title_label)
 
         form = QFormLayout()
@@ -51,7 +52,8 @@ class InputPage(QWidget):
 
         hint = QLabel(
             "Степень записывается как ** (не ^), умножение — явное (2*x). "
-            "Подробная шпаргалка — кнопка «Синтаксис» в верхней панели."
+            "Подробная шпаргалка — кнопка «Синтаксис», описание алгоритма — "
+            "кнопка «Алгоритмы» в верхней панели."
         )
         hint.setWordWrap(True)
         layout.addWidget(hint)

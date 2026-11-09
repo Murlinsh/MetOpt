@@ -13,6 +13,8 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
+from .styles import title_style
+
 
 class ModePage(QWidget):
     back_requested = pyqtSignal()
@@ -24,7 +26,7 @@ class ModePage(QWidget):
         layout = QVBoxLayout(self)
 
         title = QLabel("Выбор режима")
-        title.setStyleSheet("font-size: 18px; font-weight: bold;")
+        title.setStyleSheet(title_style())
         layout.addWidget(title)
 
         question = QLabel("Как вы хотите получить результат?")

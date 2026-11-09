@@ -6,3 +6,7 @@ venv/
 .idea/
 results/
 last_input.json
+shared-conversation.md
+.pytest_cache/
+.coverage
+htmlcov/

@@ -29,11 +29,12 @@ from optim_core.parser import (
     parse_gradient_text,
     split_additive_terms,
 )
-from optim_core.paths import RESULTS_DIR, SYNTAX_FILE
+from optim_core.paths import ALGORITHMS_FILE, RESULTS_DIR, SYNTAX_FILE
 from optim_core import storage
 
 from methods import registry
 
+from .help_dialog import HelpDialog
 from .page_input import InputPage
 from .page_method import MethodPage
 from .page_mode import ModePage
@@ -41,6 +42,19 @@ from .page_result import ResultPage
 from .widgets import GradientDialog, InputError
 
 VARIABLES = ["x", "y"]
+
+ALGORITHM_HEADINGS = {
+    "hooke_jeeves": "1. Метод Хука-Дживса",
+    "nelder_mead": "2. Метод Нелдера-Мида",
+    "ravine": "3. Метод оврагов",
+    "coordinate_descent": "4. Покоординатный спуск",
+    "steepest": "5. Наискорейший градиентный спуск",
+    "conjugate": "6. Метод сопряжённых градиентов",
+    "sgd": "7. Стохастический градиентный спуск",
+    "newton": "8. Классический метод Ньютона",
+    "broyden": "9. Метод Бройдена",
+    "bfgs": "10. Метод BFGS",
+}
 
 
 class MainWindow(QMainWindow):
@@ -72,9 +86,16 @@ class MainWindow(QMainWindow):
         self.addToolBar(toolbar)
 
         syntax_action = QAction("Синтаксис", self)
-        syntax_action.setToolTip("Открыть шпаргалку SYNTAX.md")
+        syntax_action.setToolTip("Открыть шпаргалку по синтаксису")
         syntax_action.triggered.connect(self._open_syntax)
         toolbar.addAction(syntax_action)
+
+        algorithms_action = QAction("Алгоритмы", self)
+        algorithms_action.setToolTip(
+            "Открыть подробное пояснение того, как работает каждый метод"
+        )
+        algorithms_action.triggered.connect(lambda: self._open_algorithms())
+        toolbar.addAction(algorithms_action)
 
         results_action = QAction("Папка результатов", self)
         results_action.setToolTip("Открыть папку с результатами")
@@ -108,6 +129,7 @@ class MainWindow(QMainWindow):
     def _connect_signals(self) -> None:
         self.method_page.next_requested.connect(self._method_next)
         self.method_page.exit_requested.connect(self.close)
+        self.method_page.help_requested.connect(self._open_method_help)
 
         self.input_page.back_requested.connect(
             lambda: self.stack.setCurrentWidget(self.method_page)
@@ -128,20 +150,46 @@ class MainWindow(QMainWindow):
     # ------------------------------------------------------------------
 
     def _open_syntax(self) -> None:
-        if not SYNTAX_FILE.exists():
+        self._open_document(SYNTAX_FILE, "Синтаксис")
+
+    def _open_algorithms(self, search_text: str | None = None) -> None:
+        self._open_document(
+            ALGORITHMS_FILE,
+            "Как работают методы оптимизации",
+            search_text=search_text,
+        )
+
+    def _open_method_help(self) -> None:
+        method_id = self.method_page.selected_method_id()
+        search_text = ALGORITHM_HEADINGS.get(method_id) if method_id else None
+        self._open_algorithms(search_text=search_text)
+
+    def _open_document(
+        self,
+        path: Path,
+        title: str,
+        search_text: str | None = None,
+    ) -> None:
+        if not path.exists():
             QMessageBox.warning(
                 self,
                 "Файл не найден",
-                f"Не удалось найти файл шпаргалки:\n{SYNTAX_FILE}",
+                f"Не удалось найти файл документа:\n{path}",
             )
             return
-        opened = QDesktopServices.openUrl(QUrl.fromLocalFile(str(SYNTAX_FILE)))
-        if not opened:
+
+        try:
+            text = path.read_text(encoding="utf-8")
+        except OSError as exc:
             QMessageBox.warning(
                 self,
-                "Не удалось открыть файл",
-                f"Откройте файл вручную:\n{SYNTAX_FILE}",
+                "Не удалось открыть документ",
+                f"Не удалось прочитать файл:\n{path}\n\n{exc}",
             )
+            return
+
+        dialog = HelpDialog(title, text, self, search_text=search_text)
+        dialog.exec()
 
     def _open_results(self) -> None:
         RESULTS_DIR.mkdir(parents=True, exist_ok=True)

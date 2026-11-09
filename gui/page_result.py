@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from PyQt6.QtCore import Qt, pyqtSignal
-from PyQt6.QtGui import QFontDatabase
 from PyQt6.QtWidgets import (
     QHBoxLayout,
     QLabel,
@@ -12,6 +11,8 @@ from PyQt6.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
+
+from .styles import enlarged_fixed_font, summary_style, title_style
 
 
 class ResultPage(QWidget):
@@ -25,12 +26,12 @@ class ResultPage(QWidget):
         layout = QVBoxLayout(self)
 
         title = QLabel("Результат")
-        title.setStyleSheet("font-size: 18px; font-weight: bold;")
+        title.setStyleSheet(title_style())
         layout.addWidget(title)
 
         self.summary_label = QLabel("")
         self.summary_label.setWordWrap(True)
-        self.summary_label.setStyleSheet("font-size: 14px; font-weight: bold;")
+        self.summary_label.setStyleSheet(summary_style())
         layout.addWidget(self.summary_label)
 
         self.warning_label = QLabel("")
@@ -45,8 +46,7 @@ class ResultPage(QWidget):
         self.log_edit.setPlaceholderText(
             "В режиме «Готовый ответ» пошаговый лог не выводится."
         )
-        fixed_font = QFontDatabase.systemFont(QFontDatabase.SystemFont.FixedFont)
-        self.log_edit.setFont(fixed_font)
+        self.log_edit.setFont(enlarged_fixed_font())
         layout.addWidget(self.log_edit, 1)
 
         self.file_label = QLabel("")

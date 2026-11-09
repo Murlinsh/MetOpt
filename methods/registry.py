@@ -6,7 +6,15 @@
 
 from __future__ import annotations
 
-from . import gradient_descent, hooke_jeeves, nelder_mead, newton_classic, quasi_newton, ravine
+from . import (
+    coordinate_descent,
+    gradient_descent,
+    hooke_jeeves,
+    nelder_mead,
+    newton_classic,
+    quasi_newton,
+    ravine,
+)
 from .types import FieldSpec, MethodSpec, RunResult
 
 GROUP_TITLES = {
@@ -72,6 +80,16 @@ METHODS: list[MethodSpec] = [
             ),
         ],
         run=ravine.run,
+        needs_gradient=False,
+        needs_hessian=False,
+    ),
+    MethodSpec(
+        id="coordinate_descent",
+        group="no_derivative",
+        name="Покоординатный спуск",
+        dim=2,
+        input_fields=[],
+        run=coordinate_descent.run,
         needs_gradient=False,
         needs_hessian=False,
     ),

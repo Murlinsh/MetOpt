@@ -14,11 +14,13 @@ from PyQt6.QtWidgets import (
 )
 
 from methods import registry
+from .styles import title_style
 
 
 class MethodPage(QWidget):
     next_requested = pyqtSignal()
     exit_requested = pyqtSignal()
+    help_requested = pyqtSignal()
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -26,7 +28,7 @@ class MethodPage(QWidget):
 
         layout = QVBoxLayout(self)
         title = QLabel("Выбор метода оптимизации")
-        title.setStyleSheet("font-size: 18px; font-weight: bold;")
+        title.setStyleSheet(title_style())
         subtitle = QLabel("Выберите метод в дереве и нажмите «Далее».")
         subtitle.setWordWrap(True)
 
@@ -40,6 +42,11 @@ class MethodPage(QWidget):
         layout.addWidget(self.tree, 1)
 
         buttons = QHBoxLayout()
+        self.help_button = QPushButton("Как работает метод?")
+        self.help_button.setToolTip(
+            "Открыть подробное пояснение по выбранному методу"
+        )
+        buttons.addWidget(self.help_button)
         buttons.addStretch(1)
         self.next_button = QPushButton("Далее")
         self.exit_button = QPushButton("Выход")
@@ -49,6 +56,7 @@ class MethodPage(QWidget):
 
         self.next_button.clicked.connect(self.next_requested)
         self.exit_button.clicked.connect(self.exit_requested)
+        self.help_button.clicked.connect(self.help_requested)
 
         self._build_tree()
 
