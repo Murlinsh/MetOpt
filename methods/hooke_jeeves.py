@@ -6,6 +6,19 @@ from .helpers import MAX_ITER, format_point, format_vector
 from .types import RunResult
 
 
+def _pattern_point(
+    x: list[float],
+    x_previous: list[float],
+    lam: float,
+) -> list[float]:
+    """Точка поиска по образцу: p = x + λ·(x − x_previous)."""
+
+    return [
+        x[index] + lam * (x[index] - x_previous[index])
+        for index in range(len(x))
+    ]
+
+
 def _explore(
     f_callable,
     x: list[float],
@@ -47,6 +60,7 @@ def run(f_callable, grad_callable, hess_callable, params: dict, mode: str) -> Ru
     x = [float(params["x0"]), float(params["y0"])]
     h = [float(params["h"]), float(params["h"])]
     alpha = float(params["alpha"])
+    lam = float(params.get("lam", 1.0))
     epsilon = float(params["epsilon"])
 
     explain = mode == "explain"
@@ -55,7 +69,10 @@ def run(f_callable, grad_callable, hess_callable, params: dict, mode: str) -> Ru
     if explain:
         log.append("Метод Хука-Дживса")
         log.append(f"Начальная точка: x = {format_point(x)}, f = {f_callable(*x):.6f}")
-        log.append(f"Начальный шаг: h = {format_vector(h)}, alpha = {alpha:g}, epsilon = {epsilon:g}")
+        log.append(
+            f"Начальный шаг: h = {format_vector(h)}, alpha = {alpha:g}, "
+            f"lambda = {lam:g}, epsilon = {epsilon:g}"
+        )
         log.append("-" * 60)
 
     iterations = 0
@@ -87,9 +104,11 @@ def run(f_callable, grad_callable, hess_callable, params: dict, mode: str) -> Ru
 
             while steps_left > 0:
                 steps_left -= 1
-                pattern_point = [
-                    2.0 * x[index] - x_previous[index] for index in range(len(x))
-                ]
+                pattern_point = _pattern_point(x, x_previous, lam)
+                if explain:
+                    log.append(
+                        f"    p = x + λ·(x − x_prev) = {format_point(pattern_point)}"
+                    )
                 candidate = _explore(
                     f_callable, pattern_point, h, log if explain else None
                 )

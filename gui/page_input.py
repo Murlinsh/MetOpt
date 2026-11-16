@@ -134,7 +134,7 @@ class InputPage(QWidget):
         for name, editor in self.field_editors.items():
             value = editor.value()
             if editor.spec.type != "bool":
-                if name in {"h", "step", "inner_eps", "alpha0"} and value <= 0:
+                if name in {"h", "step", "inner_eps", "alpha0", "lam"} and value <= 0:
                     raise InputError(
                         editor.spec.label,
                         f"Поле «{editor.spec.label}» должно быть положительным.",

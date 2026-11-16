@@ -44,6 +44,13 @@ METHODS: list[MethodSpec] = [
                 "Коэффициент уменьшения шага alpha",
                 "Во сколько раз уменьшается шаг, если улучшения нет (0 < alpha < 1).",
             ),
+            FieldSpec(
+                "lam",
+                "float",
+                1.0,
+                "Коэффициент шага по образцу lambda",
+                "Точка поиска по образцу: p = x + lambda·(x − x_prev). Обычно lambda = 1.",
+            ),
         ],
         run=hooke_jeeves.run,
         needs_gradient=False,

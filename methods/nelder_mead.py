@@ -8,6 +8,14 @@ from .helpers import MAX_ITER, format_point
 from .types import RunResult
 
 
+def _function_sigma(values: tuple[float, ...] | list[float]) -> float:
+    """СКО значений функции в вершинах от их среднего."""
+
+    mean = sum(values) / len(values)
+    variance = sum((value - mean) ** 2 for value in values) / len(values)
+    return math.sqrt(variance)
+
+
 def run(f_callable, grad_callable, hess_callable, params: dict, mode: str) -> RunResult:
     x0 = [float(params["x0"]), float(params["y0"])]
     step = float(params["step"])
@@ -52,14 +60,7 @@ def run(f_callable, grad_callable, hess_callable, params: dict, mode: str) -> Ru
             (p_best[index] + p_good[index]) / 2.0 for index in range(2)
         ]
         f_centroid = f_callable(*centroid)
-        sigma = math.sqrt(
-            (
-                (f_best - f_centroid) ** 2
-                + (f_good - f_centroid) ** 2
-                + (f_worst - f_centroid) ** 2
-            )
-            / 3.0
-        )
+        sigma = _function_sigma((f_best, f_good, f_worst))
 
         if explain:
             log.append(f"\n=== Итерация {iterations} ===")
@@ -70,7 +71,7 @@ def run(f_callable, grad_callable, hess_callable, params: dict, mode: str) -> Ru
                 f"  Центроид лучших двух: {format_point(centroid)}, "
                 f"f = {f_centroid:.6f}"
             )
-            log.append(f"  sigma = {sigma:.8f}")
+            log.append(f"  sigma (СКО значений f) = {sigma:.8f}")
 
         if sigma <= epsilon:
             converged = True
